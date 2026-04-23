@@ -3,8 +3,8 @@ import numpy as np
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi import Request
+#from fastapi.templating import Jinja2Templates
+#from fastapi import Request
 from PIL import Image
 import tensorflow as tf
 from tensorflow.keras.models import load_model
@@ -17,7 +17,7 @@ import matplotlib.cm as cm
 app = FastAPI(title="Chest X-Ray Pneumonia Detector") # esto puede cambiar
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+#templates = Jinja2Templates(directory="templates")
 
 # Cargar el modelo
 model = tf.keras.models.load_model("modelo_chestxray-v2.keras")
@@ -153,8 +153,9 @@ def build_suggestions(label: str, confidence: float) -> list[str]:
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def index():
+    with open("static/index.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
