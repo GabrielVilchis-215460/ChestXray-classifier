@@ -18,7 +18,7 @@ un modelo EfficientNetB0 entrenado con Transfer Learning.
 ### 1. Clonar / copiar el proyecto
 
 ```bash
-cd chest_xray_app
+cd ChestXray-classifier/
 ```
 
 ### 2. Crear entorno virtual
@@ -37,21 +37,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Colocar el modelo
-
-Copia tu archivo `modelo_chestxray.keras` dentro de la carpeta `model/`:
-
-```
-model/modelo_chestxray.keras
-```
-
-### 5. Levantar el servidor
+### 4. Levantar el servidor
 
 ```bash
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload
 ```
 
-### 6. Abrir en el navegador
+### 5. Abrir en el navegador
 
 ```
 http://localhost:8000
