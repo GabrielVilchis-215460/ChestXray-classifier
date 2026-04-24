@@ -20,11 +20,11 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 #templates = Jinja2Templates(directory="templates")
 
 # Cargar el modelo
-model = tf.keras.models.load_model("modelo_chestxray-v2.keras")
+model = tf.keras.models.load_model("modelo_chestxray-covid-v2.keras")
 
 # Configuraciones del modelo
 IMG_SIZE      = 224
-CLASS_NAMES   = ["NORMAL", "PNEUMONIA"]
+CLASS_NAMES = ["COVID-19", "Non-COVID", "Normal"] 
 LAST_CONV     = None   # se detecta automáticamente
 
 # ── Utilidades de imagen ─
@@ -127,27 +127,42 @@ def apply_filters(img_pil: Image.Image, heatmap: np.ndarray):
 
 def build_suggestions(label: str, confidence: float) -> list[str]:
     suggestions = []
-    if label == "PNEUMONIA":
+
+    if label == "COVID-19":
         suggestions += [
-            "Consultar a un médico especialista de inmediato.",
+            "Aislamiento inmediato del paciente como medida preventiva.",
+            "Realizar prueba PCR o antígeno para confirmar diagnóstico de COVID-19.",
+            "Evaluar saturación de oxígeno, temperatura y signos vitales.",
+            "Notificar al personal médico responsable para protocolo COVID.",
+        ]
+        if confidence < 0.80:
+            suggestions.append(
+                "Confianza moderada — se recomienda segunda opinión o prueba confirmatoria."
+            )
+
+    elif label == "Non-COVID":
+        suggestions += [
+            "Signos compatibles con neumonía de origen no COVID.",
+            "Consultar a médico especialista para evaluación clínica completa.",
             "Realizar pruebas complementarias: hemograma, PCR, cultivo de esputo.",
-            "Evaluar saturación de oxígeno y signos vitales.",
-            "Considerar tratamiento antibiótico o antiviral según etiología.",
+            "Evaluar saturación de oxígeno y considerar tratamiento antibiótico o antiviral.",
         ]
         if confidence < 0.75:
             suggestions.append(
-                "Confianza moderada — se recomienda segunda opinión o nueva radiografía."
+                "Confianza moderada — considerar estudios adicionales para descartar COVID-19."
             )
-    else:
+
+    else:  # Normal
         suggestions += [
-            "Radiografía sin signos evidentes de neumonía.",
-            "Mantener seguimiento clínico si el paciente presenta síntomas.",
+            "Radiografía sin signos evidentes de neumonía ni COVID-19.",
+            "Mantener seguimiento clínico si el paciente presenta síntomas respiratorios.",
             "Repetir estudio si los síntomas persisten o empeoran.",
         ]
         if confidence < 0.80:
             suggestions.append(
                 "Confianza moderada — no descarte patología con sola esta imagen."
             )
+
     return suggestions
 
 # ── Rutas ─────────────────────────────────────────────────────────────────────

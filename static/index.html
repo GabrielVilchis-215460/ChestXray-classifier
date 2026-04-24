@@ -1,645 +1,784 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PneumoScan — Detector de Neumonía</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    /* ── Variables ── */
-    :root {
-      --bg:          #0a0e14;
-      --surface:     #111620;
-      --surface2:    #18202e;
-      --border:      #1f2d42;
-      --accent:      #3b82f6;
-      --accent-glow: rgba(59,130,246,0.25);
-      --danger:      #ef4444;
-      --danger-glow: rgba(239,68,68,0.20);
-      --ok:          #22c55e;
-      --ok-glow:     rgba(34,197,94,0.20);
-      --text:        #e2e8f0;
-      --muted:       #64748b;
-      --mono:        'DM Mono', monospace;
-      --serif:       'DM Serif Display', serif;
-      --sans:        'DM Sans', sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PneumoScan — Clasificador de Radiografías</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── Variables ── */
+      :root {
+        --bg: #0a0e14;
+        --surface: #111620;
+        --surface2: #18202e;
+        --border: #1f2d42;
+        --accent: #3b82f6;
+        --accent-glow: rgba(59, 130, 246, 0.25);
+        --danger: #ef4444;
+        --danger-glow: rgba(239, 68, 68, 0.2);
+        --warning: #f59e0b;
+        --warning-glow: rgba(245, 158, 11, 0.2);
+        --ok: #22c55e;
+        --ok-glow: rgba(34, 197, 94, 0.2);
+        --text: #e2e8f0;
+        --muted: #64748b;
+        --mono: "DM Mono", monospace;
+        --serif: "DM Serif Display", serif;
+        --sans: "DM Sans", sans-serif;
+      }
 
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 15px;
-      line-height: 1.6;
-      min-height: 100vh;
-    }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 15px;
+        line-height: 1.6;
+        min-height: 100vh;
+      }
 
-    /* ── Header ── */
-    header {
-      border-bottom: 1px solid var(--border);
-      padding: 1.4rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      background: var(--surface);
-    }
-    .logo-icon {
-      width: 38px; height: 38px;
-      background: var(--accent);
-      border-radius: 10px;
-      display: grid; place-items: center;
-    }
-    .logo-icon svg { width: 22px; height: 22px; }
-    header h1 {
-      font-family: var(--serif);
-      font-size: 1.45rem;
-      letter-spacing: -0.02em;
-    }
-    header span {
-      margin-left: auto;
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--muted);
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 0.3rem 0.7rem;
-      border-radius: 6px;
-    }
+      /* ── Header ── */
+      header {
+        border-bottom: 1px solid var(--border);
+        padding: 1.4rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--surface);
+      }
+      .logo-icon {
+        width: 38px;
+        height: 38px;
+        background: var(--accent);
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+      }
+      .logo-icon svg {
+        width: 22px;
+        height: 22px;
+      }
+      header h1 {
+        font-family: var(--serif);
+        font-size: 1.45rem;
+        letter-spacing: -0.02em;
+      }
+      header span {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--muted);
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        padding: 0.3rem 0.7rem;
+        border-radius: 6px;
+      }
 
-    /* ── Layout ── */
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2.5rem 1.5rem 4rem;
-    }
+      /* ── Layout ── */
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2.5rem 1.5rem 4rem;
+      }
 
-    /* ── Upload zone ── */
-    .upload-section {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-    @media (max-width: 720px) { .upload-section { grid-template-columns: 1fr; } }
+      /* ── Upload zone ── */
+      .upload-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+      }
+      @media (max-width: 720px) {
+        .upload-section {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    .upload-card {
-      background: var(--surface);
-      border: 1px dashed var(--border);
-      border-radius: 16px;
-      padding: 2.5rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      cursor: pointer;
-      transition: border-color .2s, background .2s;
-      position: relative;
-    }
-    .upload-card:hover, .upload-card.drag-over {
-      border-color: var(--accent);
-      background: #111a2a;
-    }
-    .upload-card input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%;
-    }
-    .upload-icon {
-      width: 56px; height: 56px;
-      background: var(--surface2);
-      border-radius: 14px;
-      display: grid; place-items: center;
-      border: 1px solid var(--border);
-    }
-    .upload-icon svg { width: 28px; height: 28px; color: var(--accent); }
-    .upload-card h2 {
-      font-family: var(--serif);
-      font-size: 1.15rem;
-      text-align: center;
-    }
-    .upload-card p {
-      color: var(--muted);
-      font-size: 0.82rem;
-      text-align: center;
-      max-width: 260px;
-    }
-    .upload-card .formats {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      color: var(--muted);
-      background: var(--surface2);
-      padding: 0.25rem 0.6rem;
-      border-radius: 5px;
-      border: 1px solid var(--border);
-    }
+      .upload-card {
+        background: var(--surface);
+        border: 1px dashed var(--border);
+        border-radius: 16px;
+        padding: 2.5rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          background 0.2s;
+        position: relative;
+      }
+      .upload-card:hover,
+      .upload-card.drag-over {
+        border-color: var(--accent);
+        background: #111a2a;
+      }
+      .upload-card input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+      }
+      .upload-icon {
+        width: 56px;
+        height: 56px;
+        background: var(--surface2);
+        border-radius: 14px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--border);
+      }
+      .upload-icon svg {
+        width: 28px;
+        height: 28px;
+        color: var(--accent);
+      }
+      .upload-card h2 {
+        font-family: var(--serif);
+        font-size: 1.15rem;
+        text-align: center;
+      }
+      .upload-card p {
+        color: var(--muted);
+        font-size: 0.82rem;
+        text-align: center;
+        max-width: 260px;
+      }
+      .upload-card .formats {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--muted);
+        background: var(--surface2);
+        padding: 0.25rem 0.6rem;
+        border-radius: 5px;
+        border: 1px solid var(--border);
+      }
 
-    /* Preview */
-    .preview-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.8rem;
-    }
-    .preview-card img {
-      width: 100%;
-      max-height: 260px;
-      object-fit: contain;
-      border-radius: 10px;
-      background: #000;
-    }
-    #preview-name {
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
+      /* Preview */
+      .preview-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+      }
+      .preview-card img {
+        width: 100%;
+        max-height: 260px;
+        object-fit: contain;
+        border-radius: 10px;
+        background: #000;
+      }
+      #preview-name {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
 
-    /* ── Botón predecir ── */
-    #btn-predict {
-      display: block;
-      width: 100%;
-      padding: 1rem;
-      background: var(--accent);
-      color: #fff;
-      font-family: var(--sans);
-      font-size: 0.95rem;
-      font-weight: 500;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: opacity .2s, transform .1s;
-      letter-spacing: 0.02em;
-    }
-    #btn-predict:hover { opacity: 0.88; transform: translateY(-1px); }
-    #btn-predict:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+      /* ── Botón predecir ── */
+      #btn-predict {
+        display: block;
+        width: 100%;
+        padding: 1rem;
+        background: var(--accent);
+        color: #fff;
+        font-family: var(--sans);
+        font-size: 0.95rem;
+        font-weight: 500;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition:
+          opacity 0.2s,
+          transform 0.1s;
+        letter-spacing: 0.02em;
+      }
+      #btn-predict:hover {
+        opacity: 0.88;
+        transform: translateY(-1px);
+      }
+      #btn-predict:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        transform: none;
+      }
 
-    /* ── Loader ── */
-    .loader-wrap {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 2rem 0;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-    .loader-wrap.visible { display: flex; }
-    .spinner {
-      width: 36px; height: 36px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin .7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+      /* ── Loader ── */
+      .loader-wrap {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 2rem 0;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      .loader-wrap.visible {
+        display: flex;
+      }
+      .spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
 
-    /* ── Results ── */
-    #results { display: none; }
-    #results.visible { display: block; animation: fadeUp .4s ease; }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+      /* ── Results ── */
+      #results {
+        display: none;
+      }
+      #results.visible {
+        display: block;
+        animation: fadeUp 0.4s ease;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    /* Verdict banner */
-    .verdict {
-      border-radius: 14px;
-      padding: 1.6rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-      margin-bottom: 1.5rem;
-      border: 1px solid;
-    }
-    .verdict.pneumonia {
-      background: var(--danger-glow);
-      border-color: var(--danger);
-    }
-    .verdict.normal {
-      background: var(--ok-glow);
-      border-color: var(--ok);
-    }
-    .verdict-icon {
-      font-size: 2.4rem;
-      line-height: 1;
-    }
-    .verdict-label {
-      font-family: var(--serif);
-      font-size: 1.7rem;
-      line-height: 1;
-    }
-    .verdict.pneumonia .verdict-label { color: var(--danger); }
-    .verdict.normal    .verdict-label { color: var(--ok); }
-    .verdict-sub {
-      font-size: 0.82rem;
-      color: var(--muted);
-      margin-top: 0.3rem;
-    }
-    .confidence-pill {
-      margin-left: auto;
-      text-align: center;
-    }
-    .confidence-pill .value {
-      font-family: var(--mono);
-      font-size: 2rem;
-      font-weight: 500;
-      line-height: 1;
-    }
-    .confidence-pill .label {
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 0.25rem;
-    }
+      /* ── Verdict banner ── */
+      .verdict {
+        border-radius: 14px;
+        padding: 1.6rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid;
+      }
+      .verdict.covid {
+        background: var(--danger-glow);
+        border-color: var(--danger);
+      }
+      .verdict.noncovid {
+        background: var(--warning-glow);
+        border-color: var(--warning);
+      }
+      .verdict.normal {
+        background: var(--ok-glow);
+        border-color: var(--ok);
+      }
+      .verdict-icon {
+        font-size: 2.4rem;
+        line-height: 1;
+      }
+      .verdict-label {
+        font-family: var(--serif);
+        font-size: 1.7rem;
+        line-height: 1;
+      }
+      .verdict.covid .verdict-label {
+        color: var(--danger);
+      }
+      .verdict.noncovid .verdict-label {
+        color: var(--warning);
+      }
+      .verdict.normal .verdict-label {
+        color: var(--ok);
+      }
+      .verdict-sub {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-top: 0.3rem;
+      }
+      .confidence-pill {
+        margin-left: auto;
+        text-align: center;
+      }
+      .confidence-pill .value {
+        font-family: var(--mono);
+        font-size: 2rem;
+        font-weight: 500;
+        line-height: 1;
+      }
+      .confidence-pill .label {
+        font-size: 0.72rem;
+        color: var(--muted);
+        margin-top: 0.25rem;
+      }
 
-    /* Prob bars */
-    .probs-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    .prob-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1rem 1.2rem;
-    }
-    .prob-card .cls-name {
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 0.5rem;
-    }
-    .prob-bar-bg {
-      height: 8px;
-      background: var(--surface2);
-      border-radius: 4px;
-      overflow: hidden;
-      margin-bottom: 0.4rem;
-    }
-    .prob-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 0.8s cubic-bezier(.4,0,.2,1);
-    }
-    .prob-bar-fill.pneumonia { background: var(--danger); }
-    .prob-bar-fill.normal    { background: var(--ok); }
-    .prob-val {
-      font-family: var(--mono);
-      font-size: 1.1rem;
-    }
+      /* ── Prob bars (3 columnas) ── */
+      .probs-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      @media (max-width: 600px) {
+        .probs-row {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    /* ── Visualizaciones ── */
-    .section-title {
-      font-family: var(--serif);
-      font-size: 1.1rem;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      color: var(--text);
-    }
-    .section-title::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
+      .prob-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1rem 1.2rem;
+      }
+      .prob-card .cls-name {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--muted);
+        margin-bottom: 0.5rem;
+      }
+      .prob-bar-bg {
+        height: 8px;
+        background: var(--surface2);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.4rem;
+      }
+      .prob-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .prob-bar-fill.covid {
+        background: var(--danger);
+      }
+      .prob-bar-fill.noncovid {
+        background: var(--warning);
+      }
+      .prob-bar-fill.normal {
+        background: var(--ok);
+      }
+      .prob-val {
+        font-family: var(--mono);
+        font-size: 1.1rem;
+      }
 
-    .visuals-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    @media (max-width: 640px) { .visuals-grid { grid-template-columns: 1fr 1fr; } }
+      /* ── Visualizaciones ── */
+      .section-title {
+        font-family: var(--serif);
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--text);
+      }
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
 
-    .vis-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: border-color .2s, transform .2s;
-      cursor: pointer;
-    }
-    .vis-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-2px);
-    }
-    .vis-card img {
-      width: 100%;
-      aspect-ratio: 1;
-      object-fit: cover;
-      display: block;
-      background: #000;
-    }
-    .vis-label {
-      padding: 0.55rem 0.8rem;
-      font-size: 0.75rem;
-      font-family: var(--mono);
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-    .vis-badge {
-      margin-left: auto;
-      font-size: 0.65rem;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 0.15rem 0.45rem;
-      border-radius: 4px;
-    }
+      .visuals-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      @media (max-width: 640px) {
+        .visuals-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
 
-    /* ── Lightbox ── */
-    #lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.85);
-      z-index: 1000;
-      place-items: center;
-    }
-    #lightbox.open { display: grid; }
-    #lightbox img {
-      max-width: 90vw;
-      max-height: 85vh;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
-    #lightbox-close {
-      position: absolute;
-      top: 1.2rem; right: 1.5rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 8px;
-      padding: 0.4rem 0.8rem;
-      cursor: pointer;
-      font-family: var(--mono);
-      font-size: 0.8rem;
-    }
+      .vis-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        overflow: hidden;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+        cursor: pointer;
+      }
+      .vis-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-2px);
+      }
+      .vis-card img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        display: block;
+        background: #000;
+      }
+      .vis-label {
+        padding: 0.55rem 0.8rem;
+        font-size: 0.75rem;
+        font-family: var(--mono);
+        color: var(--muted);
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .vis-badge {
+        margin-left: auto;
+        font-size: 0.65rem;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        padding: 0.15rem 0.45rem;
+        border-radius: 4px;
+      }
 
-    /* ── Sugerencias ── */
-    .suggestions {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.2rem 1.4rem;
-      margin-bottom: 1.5rem;
-    }
-    .suggestions ul {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.6rem;
-    }
-    .suggestions li {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.7rem;
-      font-size: 0.87rem;
-      color: var(--text);
-    }
-    .suggestions li::before {
-      content: '→';
-      color: var(--accent);
-      font-family: var(--mono);
-      flex-shrink: 0;
-      margin-top: 0.05rem;
-    }
+      /* ── Lightbox ── */
+      #lightbox {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.85);
+        z-index: 1000;
+        place-items: center;
+      }
+      #lightbox.open {
+        display: grid;
+      }
+      #lightbox img {
+        max-width: 90vw;
+        max-height: 85vh;
+        border-radius: 12px;
+        border: 1px solid var(--border);
+      }
+      #lightbox-close {
+        position: absolute;
+        top: 1.2rem;
+        right: 1.5rem;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        border-radius: 8px;
+        padding: 0.4rem 0.8rem;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 0.8rem;
+      }
 
-    /* ── Disclaimer ── */
-    .disclaimer {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--accent);
-      border-radius: 10px;
-      padding: 0.9rem 1.2rem;
-      font-size: 0.78rem;
-      color: var(--muted);
-      line-height: 1.6;
-    }
-    .disclaimer strong { color: var(--text); }
+      /* ── Sugerencias ── */
+      .suggestions {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.2rem 1.4rem;
+        margin-bottom: 1.5rem;
+      }
+      .suggestions ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+      }
+      .suggestions li {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.7rem;
+        font-size: 0.87rem;
+        color: var(--text);
+      }
+      .suggestions li::before {
+        content: "→";
+        color: var(--accent);
+        font-family: var(--mono);
+        flex-shrink: 0;
+        margin-top: 0.05rem;
+      }
 
-    /* ── Reset btn ── */
-    #btn-reset {
-      margin-top: 1.5rem;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      padding: 0.6rem 1.4rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      transition: border-color .2s, color .2s;
-    }
-    #btn-reset:hover { border-color: var(--text); color: var(--text); }
-  </style>
-</head>
-<body>
+      /* ── Disclaimer ── */
+      .disclaimer {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: 10px;
+        padding: 0.9rem 1.2rem;
+        font-size: 0.78rem;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .disclaimer strong {
+        color: var(--text);
+      }
 
-<header>
-  <div class="logo-icon">
-    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
-      <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
-      <path d="M8 12h3l1-4 2 8 1-4h1"/>
-    </svg>
-  </div>
-  <h1>PneumoScan</h1>
-  <span>EfficientNetB0 · Transfer Learning</span>
-</header>
-
-<div class="container">
-
-  <!-- Upload -->
-  <div class="upload-section">
-    <label class="upload-card" id="drop-zone">
-      <input type="file" id="file-input" accept="image/*" />
-      <div class="upload-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="17 8 12 3 7 8"/>
-          <line x1="12" y1="3" x2="12" y2="15"/>
+      /* ── Reset btn ── */
+      #btn-reset {
+        margin-top: 1.5rem;
+        background: transparent;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        padding: 0.6rem 1.4rem;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        transition:
+          border-color 0.2s,
+          color 0.2s;
+      }
+      #btn-reset:hover {
+        border-color: var(--text);
+        color: var(--text);
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo-icon">
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          stroke-width="2"
+          stroke-linecap="round"
+        >
+          <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z" />
+          <path d="M8 12h3l1-4 2 8 1-4h1" />
         </svg>
       </div>
-      <h2>Sube tu radiografía</h2>
-      <p>Arrastra y suelta una imagen de rayos X de tórax o haz clic para seleccionarla</p>
-      <span class="formats">JPG · PNG · WEBP</span>
-    </label>
+      <h1>PneumoScan</h1>
+      <span>EfficientNetB0 · 3 clases · Transfer Learning</span>
+    </header>
 
-    <div class="preview-card" id="preview-card" style="display:none;">
-      <img id="preview-img" src="" alt="Preview" />
-      <span id="preview-name"></span>
-      <button id="btn-predict" disabled>Analizar radiografía</button>
-    </div>
-  </div>
+    <div class="container">
+      <!-- Upload -->
+      <div class="upload-section">
+        <label class="upload-card" id="drop-zone">
+          <input type="file" id="file-input" accept="image/*" />
+          <div class="upload-icon">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="17 8 12 3 7 8" />
+              <line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+          </div>
+          <h2>Sube tu radiografía</h2>
+          <p>
+            Arrastra y suelta una imagen de rayos X de tórax o haz clic para
+            seleccionarla
+          </p>
+          <span class="formats">JPG · PNG · WEBP</span>
+        </label>
 
-  <!-- Loader -->
-  <div class="loader-wrap" id="loader">
-    <div class="spinner"></div>
-    <span>Analizando imagen con el modelo…</span>
-  </div>
-
-  <!-- Results -->
-  <div id="results">
-
-    <!-- Verdict -->
-    <div class="verdict" id="verdict-banner">
-      <div class="verdict-icon" id="verdict-icon"></div>
-      <div>
-        <div class="verdict-label" id="verdict-label"></div>
-        <div class="verdict-sub" id="verdict-sub"></div>
+        <div class="preview-card" id="preview-card" style="display: none">
+          <img id="preview-img" src="" alt="Preview" />
+          <span id="preview-name"></span>
+          <button id="btn-predict" disabled>Analizar radiografía</button>
+        </div>
       </div>
-      <div class="confidence-pill">
-        <div class="value" id="conf-value"></div>
-        <div class="label">confianza</div>
+
+      <!-- Loader -->
+      <div class="loader-wrap" id="loader">
+        <div class="spinner"></div>
+        <span>Analizando imagen con el modelo…</span>
+      </div>
+
+      <!-- Results -->
+      <div id="results">
+        <!-- Verdict -->
+        <div class="verdict" id="verdict-banner">
+          <div class="verdict-icon" id="verdict-icon"></div>
+          <div>
+            <div class="verdict-label" id="verdict-label"></div>
+            <div class="verdict-sub" id="verdict-sub"></div>
+          </div>
+          <div class="confidence-pill">
+            <div class="value" id="conf-value"></div>
+            <div class="label">confianza</div>
+          </div>
+        </div>
+
+        <!-- Prob bars (3 clases) -->
+        <div class="probs-row" id="probs-row"></div>
+
+        <!-- Visualizaciones -->
+        <div class="section-title">Visualizaciones diagnósticas</div>
+        <div class="visuals-grid" id="visuals-grid"></div>
+
+        <!-- Sugerencias -->
+        <div class="section-title">Recomendaciones clínicas</div>
+        <div class="suggestions">
+          <ul id="suggestions-list"></ul>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+          <strong>⚠ Aviso importante:</strong> Este sistema es una herramienta
+          de apoyo basada en inteligencia artificial y
+          <strong>no reemplaza el diagnóstico médico profesional</strong>. Los
+          resultados deben ser interpretados siempre por un médico calificado.
+          No tome decisiones clínicas basándose únicamente en este análisis.
+        </div>
+
+        <button id="btn-reset">← Analizar otra imagen</button>
       </div>
     </div>
 
-    <!-- Prob bars -->
-    <div class="probs-row" id="probs-row"></div>
-
-    <!-- Visualizaciones -->
-    <div class="section-title">Visualizaciones diagnósticas</div>
-    <div class="visuals-grid" id="visuals-grid"></div>
-
-    <!-- Sugerencias -->
-    <div class="section-title">Recomendaciones clínicas</div>
-    <div class="suggestions">
-      <ul id="suggestions-list"></ul>
+    <!-- Lightbox -->
+    <div id="lightbox">
+      <button id="lightbox-close">ESC / cerrar</button>
+      <img id="lightbox-img" src="" alt="" />
     </div>
 
-    <!-- Disclaimer -->
-    <div class="disclaimer">
-      <strong>⚠ Aviso importante:</strong> Este sistema es una herramienta de apoyo basada en
-      inteligencia artificial y <strong>no reemplaza el diagnóstico médico profesional</strong>.
-      Los resultados deben ser interpretados siempre por un médico calificado. No tome decisiones
-      clínicas basándose únicamente en este análisis.
-    </div>
+    <script>
+      const VIS_META = {
+        original: { label: "Original", badge: "RAW" },
+        gradcam: { label: "Mapa de calor (Grad-CAM)", badge: "IA" },
+        grayscale: { label: "Escala de grises", badge: "GRAY" },
+        canny: { label: "Detección de bordes", badge: "CANNY" },
+        clahe: { label: "Contraste mejorado", badge: "CLAHE" },
+        inverted: { label: "Negativo", badge: "INV" },
+      };
 
-    <button id="btn-reset">← Analizar otra imagen</button>
-  </div>
+      // Configuración de cada clase: icono, texto, subtítulo, clase CSS
+      const CLASS_CONFIG = {
+        "COVID-19": {
+          icon: "🦠",
+          label: "COVID-19 detectado",
+          sub: "El modelo identificó patrones compatibles con COVID-19.",
+          css: "covid",
+          barCss: "covid",
+        },
+        "Non-COVID": {
+          icon: "🫁",
+          label: "Neumonía no-COVID",
+          sub: "El modelo identificó patrones compatibles con neumonía de origen no COVID.",
+          css: "noncovid",
+          barCss: "noncovid",
+        },
+        Normal: {
+          icon: "✅",
+          label: "Sin hallazgos",
+          sub: "La radiografía no muestra signos evidentes de neumonía ni COVID-19.",
+          css: "normal",
+          barCss: "normal",
+        },
+      };
 
-</div>
+      const fileInput = document.getElementById("file-input");
+      const dropZone = document.getElementById("drop-zone");
+      const previewCard = document.getElementById("preview-card");
+      const previewImg = document.getElementById("preview-img");
+      const previewName = document.getElementById("preview-name");
+      const btnPredict = document.getElementById("btn-predict");
+      const loader = document.getElementById("loader");
+      const results = document.getElementById("results");
+      const btnReset = document.getElementById("btn-reset");
+      const lightbox = document.getElementById("lightbox");
+      const lbImg = document.getElementById("lightbox-img");
 
-<!-- Lightbox -->
-<div id="lightbox">
-  <button id="lightbox-close">ESC / cerrar</button>
-  <img id="lightbox-img" src="" alt=""/>
-</div>
+      let selectedFile = null;
 
-<script>
-  const VIS_META = {
-    original:  { label: "Original",                badge: "RAW" },
-    gradcam:   { label: "Mapa de calor (Grad-CAM)", badge: "IA" },
-    grayscale: { label: "Escala de grises",         badge: "GRAY" },
-    canny:     { label: "Detección de bordes",      badge: "CANNY" },
-    clahe:     { label: "Contraste mejorado",       badge: "CLAHE" },
-    inverted:  { label: "Negativo",                 badge: "INV" },
-  };
+      // Drag & drop
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("drag-over");
+      });
+      dropZone.addEventListener("dragleave", () =>
+        dropZone.classList.remove("drag-over"),
+      );
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
+        const f = e.dataTransfer.files[0];
+        if (f) handleFile(f);
+      });
 
-  const fileInput   = document.getElementById('file-input');
-  const dropZone    = document.getElementById('drop-zone');
-  const previewCard = document.getElementById('preview-card');
-  const previewImg  = document.getElementById('preview-img');
-  const previewName = document.getElementById('preview-name');
-  const btnPredict  = document.getElementById('btn-predict');
-  const loader      = document.getElementById('loader');
-  const results     = document.getElementById('results');
-  const btnReset    = document.getElementById('btn-reset');
-  const lightbox    = document.getElementById('lightbox');
-  const lbImg       = document.getElementById('lightbox-img');
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files[0]) handleFile(fileInput.files[0]);
+      });
 
-  let selectedFile = null;
+      function handleFile(file) {
+        selectedFile = file;
+        const url = URL.createObjectURL(file);
+        previewImg.src = url;
+        previewName.textContent = file.name;
+        previewCard.style.display = "flex";
+        btnPredict.disabled = false;
+        results.classList.remove("visible");
+      }
 
-  // Drag & drop
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const f = e.dataTransfer.files[0];
-    if (f) handleFile(f);
-  });
+      btnPredict.addEventListener("click", async () => {
+        if (!selectedFile) return;
+        btnPredict.disabled = true;
+        loader.classList.add("visible");
+        results.classList.remove("visible");
 
-  fileInput.addEventListener('change', () => {
-    if (fileInput.files[0]) handleFile(fileInput.files[0]);
-  });
+        const form = new FormData();
+        form.append("file", selectedFile);
 
-  function handleFile(file) {
-    selectedFile = file;
-    const url = URL.createObjectURL(file);
-    previewImg.src = url;
-    previewName.textContent = file.name;
-    previewCard.style.display = 'flex';
-    btnPredict.disabled = false;
-    results.classList.remove('visible');
-  }
+        try {
+          const res = await fetch("/predict", { method: "POST", body: form });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.detail || "Error del servidor");
+          renderResults(data);
+        } catch (err) {
+          alert("Error: " + err.message);
+        } finally {
+          loader.classList.remove("visible");
+          btnPredict.disabled = false;
+        }
+      });
 
-  btnPredict.addEventListener('click', async () => {
-    if (!selectedFile) return;
-    btnPredict.disabled = true;
-    loader.classList.add('visible');
-    results.classList.remove('visible');
+      function renderResults(data) {
+        const cfg = CLASS_CONFIG[data.label] || CLASS_CONFIG["Normal"];
 
-    const form = new FormData();
-    form.append('file', selectedFile);
+        // Verdict banner
+        const banner = document.getElementById("verdict-banner");
+        banner.className = "verdict " + cfg.css;
+        document.getElementById("verdict-icon").textContent = cfg.icon;
+        document.getElementById("verdict-label").textContent = cfg.label;
+        document.getElementById("verdict-sub").textContent = cfg.sub;
+        document.getElementById("conf-value").textContent =
+          data.confidence.toFixed(1) + "%";
 
-    try {
-      const res  = await fetch('/predict', { method: 'POST', body: form });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Error del servidor');
-      renderResults(data);
-    } catch (err) {
-      alert('Error: ' + err.message);
-    } finally {
-      loader.classList.remove('visible');
-      btnPredict.disabled = false;
-    }
-  });
-
-  function renderResults(data) {
-    const isPneumonia = data.label === 'PNEUMONIA';
-
-    // Verdict
-    const banner = document.getElementById('verdict-banner');
-    banner.className = 'verdict ' + (isPneumonia ? 'pneumonia' : 'normal');
-    document.getElementById('verdict-icon').textContent  = isPneumonia ? '🫁' : '✅';
-    document.getElementById('verdict-label').textContent = isPneumonia ? 'Neumonía detectada' : 'Sin neumonía';
-    document.getElementById('verdict-sub').textContent   = isPneumonia
-      ? 'El modelo identificó patrones compatibles con neumonía.'
-      : 'La radiografía no muestra signos evidentes de neumonía.';
-    document.getElementById('conf-value').textContent = data.confidence.toFixed(1) + '%';
-
-    // Prob bars
-    const probsRow = document.getElementById('probs-row');
-    probsRow.innerHTML = '';
-    for (const [cls, pct] of Object.entries(data.probs)) {
-      const isP = cls === 'PNEUMONIA';
-      probsRow.innerHTML += `
+        // Prob bars — 3 clases con color individual
+        const probsRow = document.getElementById("probs-row");
+        probsRow.innerHTML = "";
+        for (const [cls, pct] of Object.entries(data.probs)) {
+          const barCss = (CLASS_CONFIG[cls] || {}).barCss || "normal";
+          probsRow.innerHTML += `
         <div class="prob-card">
           <div class="cls-name">${cls}</div>
           <div class="prob-bar-bg">
-            <div class="prob-bar-fill ${isP ? 'pneumonia' : 'normal'}"
-                 style="width:${pct}%"></div>
+            <div class="prob-bar-fill ${barCss}" style="width:${pct}%"></div>
           </div>
           <div class="prob-val">${pct.toFixed(1)}%</div>
         </div>`;
-    }
+        }
 
-    // Visualizaciones
-    const grid = document.getElementById('visuals-grid');
-    grid.innerHTML = '';
-    for (const [key, meta] of Object.entries(VIS_META)) {
-      const src = 'data:image/png;base64,' + data.visuals[key];
-      grid.innerHTML += `
+        // Visualizaciones
+        const grid = document.getElementById("visuals-grid");
+        grid.innerHTML = "";
+        for (const [key, meta] of Object.entries(VIS_META)) {
+          const src = "data:image/png;base64," + data.visuals[key];
+          grid.innerHTML += `
         <div class="vis-card" onclick="openLightbox('${src}')">
           <img src="${src}" alt="${meta.label}" loading="lazy"/>
           <div class="vis-label">
@@ -647,38 +786,38 @@
             <span class="vis-badge">${meta.badge}</span>
           </div>
         </div>`;
-    }
+        }
 
-    // Sugerencias
-    const ul = document.getElementById('suggestions-list');
-    ul.innerHTML = data.suggestions.map(s => `<li>${s}</li>`).join('');
+        // Sugerencias
+        const ul = document.getElementById("suggestions-list");
+        ul.innerHTML = data.suggestions.map((s) => `<li>${s}</li>`).join("");
 
-    results.classList.add('visible');
-    results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+        results.classList.add("visible");
+        results.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
 
-  // Lightbox
-  function openLightbox(src) {
-    lbImg.src = src;
-    lightbox.classList.add('open');
-  }
-  lightbox.addEventListener('click', e => {
-    if (e.target === lightbox || e.target.id === 'lightbox-close')
-      lightbox.classList.remove('open');
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') lightbox.classList.remove('open');
-  });
+      // Lightbox
+      function openLightbox(src) {
+        lbImg.src = src;
+        lightbox.classList.add("open");
+      }
+      lightbox.addEventListener("click", (e) => {
+        if (e.target === lightbox || e.target.id === "lightbox-close")
+          lightbox.classList.remove("open");
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") lightbox.classList.remove("open");
+      });
 
-  // Reset
-  btnReset.addEventListener('click', () => {
-    selectedFile = null;
-    fileInput.value = '';
-    previewCard.style.display = 'none';
-    results.classList.remove('visible');
-    btnPredict.disabled = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-</script>
-</body>
+      // Reset
+      btnReset.addEventListener("click", () => {
+        selectedFile = null;
+        fileInput.value = "";
+        previewCard.style.display = "none";
+        results.classList.remove("visible");
+        btnPredict.disabled = true;
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    </script>
+  </body>
 </html>
