@@ -13,6 +13,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+from scipy.ndimage import gaussian_filter
 
 app = FastAPI(title="Chest X-Ray Pneumonia Detector") # esto puede cambiar
 
@@ -96,8 +97,12 @@ def apply_filters(img_pil: Image.Image, heatmap: np.ndarray):
     # 2. Grad-CAM
     gradcam_b64 = arr_to_b64(heatmap_overlay(img_rgb, heatmap))
 
-    # 3. Escala de grises
-    gray_b64 = arr_to_b64(np.stack([img_gray]*3, axis=-1))
+    # 3. Realce de texturas o unsharp masking
+    # gray_b64 = arr_to_b64(np.stack([img_gray]*3, axis=-1))
+    blur      = gaussian_filter(img_gray.astype(np.float32), sigma=2)
+    sharpened = np.clip(img_gray.astype(np.float32) + 1.5 * (img_gray.astype(np.float32) - blur), 0, 255)
+    sharp_rgb = np.stack([sharpened.astype(np.uint8)]*3, axis=-1)
+    sharp_b64 = arr_to_b64(sharp_rgb)
 
     # 4. Canny — bordes resaltados
     edges      = cv2.Canny(img_gray, threshold1=40, threshold2=120)
@@ -117,7 +122,7 @@ def apply_filters(img_pil: Image.Image, heatmap: np.ndarray):
     return {
         "original":  original_b64,
         "gradcam":   gradcam_b64,
-        "grayscale": gray_b64,
+        "sharpened":  sharp_b64,
         "canny":     canny_b64,
         "clahe":     clahe_b64,
         "inverted":  inverted_b64,
