@@ -176,6 +176,11 @@ def build_suggestions(label: str, confidence: float) -> list[str]:
 async def index():
     with open("static/index.html", "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
+    
+@app.get("/static/guide.html", response_class=HTMLResponse)
+async def guide():
+    with open("static/guide.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):

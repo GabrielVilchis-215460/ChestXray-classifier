@@ -74,7 +74,7 @@
         font-size: 1.45rem;
         letter-spacing: -0.02em;
       }
-      header span {
+      /*header span {
         margin-left: auto;
         font-family: var(--mono);
         font-size: 0.72rem;
@@ -83,7 +83,7 @@
         border: 1px solid var(--border);
         padding: 0.3rem 0.7rem;
         border-radius: 6px;
-      }
+      }*/
 
       /* ── Layout ── */
       .container {
@@ -544,7 +544,20 @@
     </style>
   </head>
   <body>
-    <header>
+    <nav
+      style="
+        border-bottom: 1px solid var(--border);
+        padding: 1.4rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: var(--surface);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        width: 100%;
+      "
+    >
       <div class="logo-icon">
         <svg
           viewBox="0 0 24 24"
@@ -557,9 +570,45 @@
           <path d="M8 12h3l1-4 2 8 1-4h1" />
         </svg>
       </div>
-      <h1>PneumoScan</h1>
-      <span>EfficientNetB0 · 3 clases · Transfer Learning</span>
-    </header>
+      <span
+        style="
+          font-family: var(--serif);
+          font-size: 1.45rem;
+          border: none;
+          background: none;
+          padding: 0;
+        "
+        >PneumoScan</span
+      >
+      <a
+        href="/static/index.html"
+        style="
+          margin-left: auto;
+          text-decoration: none;
+          color: var(--text);
+          background: var(--surface2);
+          border: 1px solid var(--border);
+          padding: 0.45rem 1rem;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          font-family: var(--sans);
+        "
+        >Detector</a
+      >
+      <a
+        href="/static/guide.html"
+        style="
+          text-decoration: none;
+          color: var(--muted);
+          padding: 0.45rem 1rem;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          border: 1px solid transparent;
+          font-family: var(--sans);
+        "
+        >Guía Radiológica</a
+      >
+    </nav>
 
     <div class="container">
       <!-- Upload -->
