@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Acerca del Modelo — PneumoScan</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0a0e14;
+      --surface:  #111620;
+      --surface2: #18202e;
+      --border:   #1f2d42;
+      --accent:   #3b82f6;
+      --danger:   #ef4444;
+      --covid:    #f59e0b;
+      --ok:       #22c55e;
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --serif:    'DM Serif Display', serif;
+      --mono:     'DM Mono', monospace;
+      --sans:     'DM Sans', sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.7; }
+    nav { border-bottom: 1px solid var(--border); padding: 1.4rem 2rem; display: flex; align-items: center; gap: 1rem; background: var(--surface); position: sticky; top: 0; z-index: 100; width: 100%; }
+    .logo-icon { width: 38px; height: 38px; background: var(--accent); border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; }
+    .logo-icon svg { width: 22px; height: 22px; }
+    .hero { text-align: center; padding: 5rem 1.5rem 3rem; max-width: 700px; margin: 0 auto; }
+    .hero-tag { display: inline-block; font-family: var(--mono); font-size: 0.7rem; color: var(--accent); background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.3); padding: 0.3rem 0.8rem; border-radius: 20px; margin-bottom: 1.2rem; letter-spacing: 0.08em; }
+    .hero h1 { font-family: var(--serif); font-size: clamp(2rem,5vw,2.8rem); line-height: 1.15; margin-bottom: 1rem; }
+    .hero p { color: var(--muted); font-size: 0.92rem; max-width: 500px; margin: 0 auto; }
+    .container { max-width: 900px; margin: 0 auto; padding: 0 1.5rem 5rem; }
+    .section-title { font-family: var(--serif); font-size: 1.25rem; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.7rem; }
+    .section-title::after { content:''; flex:1; height:1px; background:var(--border); }
+    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+    @media(max-width:640px){ .metrics-grid { grid-template-columns: 1fr 1fr; } }
+    .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem 1.2rem; text-align: center; }
+    .metric-card .value { font-family: var(--mono); font-size: 2rem; font-weight: 500; line-height: 1; margin-bottom: 0.4rem; }
+    .metric-card .label { font-size: 0.75rem; color: var(--muted); }
+    .metric-card.accent-ok    { border-color: rgba(34,197,94,0.4);  background: rgba(34,197,94,0.05); }
+    .metric-card.accent-blue  { border-color: rgba(59,130,246,0.4); background: rgba(59,130,246,0.05); }
+    .metric-card.accent-covid { border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.05); }
+    .metric-card.accent-red   { border-color: rgba(239,68,68,0.4);  background: rgba(239,68,68,0.05); }
+    .arch-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; margin-bottom: 2.5rem; }
+    .arch-flow { display: flex; align-items: center; padding: 2rem; overflow-x: auto; gap: 0; }
+    .arch-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1.1rem; text-align: center; flex-shrink: 0; min-width: 110px; }
+    .arch-block .arch-icon { font-size: 1.4rem; margin-bottom: 0.3rem; }
+    .arch-block .arch-name { font-family: var(--mono); font-size: 0.68rem; color: var(--text); display: block; }
+    .arch-block .arch-detail { font-size: 0.65rem; color: var(--muted); display: block; margin-top: 0.15rem; }
+    .arch-block.highlight { border-color: var(--accent); background: rgba(59,130,246,0.08); }
+    .arch-arrow { color: var(--muted); font-size: 1.1rem; padding: 0 0.5rem; flex-shrink: 0; }
+    .dataset-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2.5rem; }
+    @media(max-width:580px){ .dataset-grid { grid-template-columns: 1fr; } }
+    .dataset-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; }
+    .cls-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+    .cls-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .cls-name { font-family: var(--mono); font-size: 0.75rem; }
+    .cls-count { font-family: var(--mono); font-size: 1.5rem; font-weight: 500; margin-bottom: 0.2rem; }
+    .cls-sub { font-size: 0.75rem; color: var(--muted); }
+    .bar-row { display: flex; align-items: center; gap: 0.8rem; margin-bottom: 0.6rem; }
+    .bar-label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); width: 80px; flex-shrink: 0; }
+    .bar-bg { flex: 1; height: 7px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; }
+    .bar-val { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); width: 36px; text-align: right; flex-shrink: 0; }
+    .training-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2.5rem; }
+    @media(max-width:580px){ .training-grid { grid-template-columns: 1fr; } }
+    .training-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.4rem; }
+    .training-card h3 { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 1rem; }
+    .param-row { display: flex; justify-content: space-between; align-items: center; padding: 0.55rem 0; border-bottom: 1px solid var(--border); font-size: 0.83rem; }
+    .param-row:last-child { border-bottom: none; }
+    .param-row .param-key { color: var(--muted); }
+    .param-row .param-val { font-family: var(--mono); font-size: 0.78rem; }
+    .limitations { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 1.6rem; margin-bottom: 2.5rem; }
+    .limit-item { display: flex; gap: 0.8rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+    .limit-item:last-child { border-bottom: none; }
+    .limit-num { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; flex-shrink: 0; margin-top: 0.1rem; }
+    .limit-item p { color: var(--text); line-height: 1.5; }
+    .limit-item span { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 0.2rem; }
+    .stack-row { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: 2.5rem; }
+    .stack-pill { font-family: var(--mono); font-size: 0.72rem; background: var(--surface); border: 1px solid var(--border); padding: 0.4rem 0.9rem; border-radius: 20px; color: var(--text); }
+    .stack-pill.primary { border-color: rgba(59,130,246,0.5); color: #93c5fd; background: rgba(59,130,246,0.08); }
+    .disclaimer { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 10px; padding: 1rem 1.3rem; font-size: 0.8rem; color: var(--muted); }
+    .disclaimer strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo-icon">
+    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round">
+      <path d="M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2z"/>
+      <path d="M8 12h3l1-4 2 8 1-4h1"/>
+    </svg>
+  </div>
+  <span style="font-family:var(--serif);font-size:1.45rem;border:none;background:none;padding:0;">PneumoScan</span>
+  <a href="/static/index.html" style="margin-left:auto;text-decoration:none;color:var(--muted);padding:0.45rem 1rem;border-radius:8px;font-size:0.85rem;border:1px solid transparent;font-family:var(--sans);">Detector</a>
+  <a href="/static/guide.html" style="text-decoration:none;color:var(--muted);padding:0.45rem 1rem;border-radius:8px;font-size:0.85rem;border:1px solid transparent;font-family:var(--sans);">Guía Radiológica</a>
+  <a href="/static/about.html" style="text-decoration:none;color:var(--text);background:var(--surface2);border:1px solid var(--border);padding:0.45rem 1rem;border-radius:8px;font-size:0.85rem;font-family:var(--sans);">Acerca del Modelo</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">MODELO · ARQUITECTURA · MÉTRICAS</div>
+  <h1>Acerca del Modelo</h1>
+  <p>Detalles técnicos del sistema de clasificación de radiografías torácicas basado en Transfer Learning con EfficientNetB0.</p>
+</div>
+
+<div class="container">
+
+  <div class="section-title">Métricas de rendimiento</div>
+  <div class="metrics-grid">
+    <div class="metric-card accent-ok">
+      <div class="value" style="color:var(--ok);">88%</div>
+      <div class="label">Exactitud global (test)</div>
+    </div>
+    <div class="metric-card accent-blue">
+      <div class="value" style="color:#93c5fd;">0.88</div>
+      <div class="label">Micro F1-Score</div>
+    </div>
+    <div class="metric-card accent-covid">
+      <div class="value" style="color:var(--covid);">3</div>
+      <div class="label">Clases clasificadas</div>
+    </div>
+    <div class="metric-card accent-red">
+      <div class="value" style="color:#f87171;">40</div>
+      <div class="label">Épocas de entrenamiento</div>
+    </div>
+  </div>
+
+  <div class="section-title">Arquitectura del modelo</div>
+  <div class="arch-card">
+    <div class="arch-flow">
+      <div class="arch-block"><div class="arch-icon">🖼️</div><span class="arch-name">Input</span><span class="arch-detail">224 × 224 × 3</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-block"><div class="arch-icon">⚙️</div><span class="arch-name">Preprocess</span><span class="arch-detail">EfficientNet norm</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-block highlight"><div class="arch-icon">🧠</div><span class="arch-name">EfficientNetB0</span><span class="arch-detail">ImageNet weights</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-block"><div class="arch-icon">🔗</div><span class="arch-name">GlobalAvgPool</span><span class="arch-detail">1280-dim vector</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-block"><div class="arch-icon">💡</div><span class="arch-name">Dense 256</span><span class="arch-detail">ReLU + Dropout 0.5</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-block highlight"><div class="arch-icon">📊</div><span class="arch-name">Output</span><span class="arch-detail">Softmax · 3 clases</span></div>
+    </div>
+    <div style="padding:0 2rem 1.6rem;">
+      <p style="font-size:0.82rem;color:var(--muted);">La base convolucional EfficientNetB0 fue inicialmente congelada para entrenar solo las capas superiores (fase 1), y posteriormente se descongelaron las últimas 40 capas para fine-tuning (fase 2), permitiendo que el modelo adapte los filtros al dominio de radiografías torácicas.</p>
+    </div>
+  </div>
+
+  <div class="section-title">Dataset de entrenamiento</div>
+  <div class="dataset-grid">
+    <div class="dataset-card">
+      <div class="cls-header"><div class="cls-dot" style="background:var(--covid);"></div><span class="cls-name">COVID-19</span></div>
+      <div class="cls-count" style="color:var(--covid);">~1,200</div>
+      <div class="cls-sub">imágenes de entrenamiento</div>
+    </div>
+    <div class="dataset-card">
+      <div class="cls-header"><div class="cls-dot" style="background:var(--danger);"></div><span class="cls-name">Non-COVID</span></div>
+      <div class="cls-count" style="color:var(--danger);">~1,300</div>
+      <div class="cls-sub">imágenes de entrenamiento</div>
+    </div>
+    <div class="dataset-card">
+      <div class="cls-header"><div class="cls-dot" style="background:var(--ok);"></div><span class="cls-name">Normal</span></div>
+      <div class="cls-count" style="color:var(--ok);">~1,300</div>
+      <div class="cls-sub">imágenes de entrenamiento</div>
+    </div>
+  </div>
+
+  <div class="section-title">Rendimiento por clase</div>
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.6rem;margin-bottom:2.5rem;">
+    <div style="margin-bottom:1.4rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--covid);">COVID-19</span>
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);">F1 ~0.87</span>
+      </div>
+      <div class="bar-row"><span class="bar-label">Precision</span><div class="bar-bg"><div class="bar-fill" style="width:86%;background:var(--covid);"></div></div><span class="bar-val">86%</span></div>
+      <div class="bar-row"><span class="bar-label">Recall</span><div class="bar-bg"><div class="bar-fill" style="width:88%;background:var(--covid);"></div></div><span class="bar-val">88%</span></div>
+    </div>
+    <div style="margin-bottom:1.4rem;">
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--danger);">Non-COVID</span>
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);">F1 ~0.87</span>
+      </div>
+      <div class="bar-row"><span class="bar-label">Precision</span><div class="bar-bg"><div class="bar-fill" style="width:85%;background:var(--danger);"></div></div><span class="bar-val">85%</span></div>
+      <div class="bar-row"><span class="bar-label">Recall</span><div class="bar-bg"><div class="bar-fill" style="width:89%;background:var(--danger);"></div></div><span class="bar-val">89%</span></div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--ok);">Normal</span>
+        <span style="font-family:var(--mono);font-size:0.75rem;color:var(--muted);">F1 ~0.90</span>
+      </div>
+      <div class="bar-row"><span class="bar-label">Precision</span><div class="bar-bg"><div class="bar-fill" style="width:91%;background:var(--ok);"></div></div><span class="bar-val">91%</span></div>
+      <div class="bar-row"><span class="bar-label">Recall</span><div class="bar-bg"><div class="bar-fill" style="width:89%;background:var(--ok);"></div></div><span class="bar-val">89%</span></div>
+    </div>
+    <p style="font-size:0.75rem;color:var(--muted);margin-top:1.2rem;">* Valores aproximados basados en el conjunto de prueba.</p>
+  </div>
+
+  <div class="section-title">Parámetros de entrenamiento</div>
+  <div class="training-grid">
+    <div class="training-card">
+      <h3>FASE 1 — TRANSFER LEARNING</h3>
+      <div class="param-row"><span class="param-key">Base model</span><span class="param-val">EfficientNetB0 (frozen)</span></div>
+      <div class="param-row"><span class="param-key">Learning rate</span><span class="param-val">0.0001</span></div>
+      <div class="param-row"><span class="param-key">Épocas</span><span class="param-val">20 (early stopping)</span></div>
+      <div class="param-row"><span class="param-key">Patience</span><span class="param-val">5</span></div>
+      <div class="param-row"><span class="param-key">Optimizador</span><span class="param-val">Adam</span></div>
+      <div class="param-row"><span class="param-key">Loss</span><span class="param-val">Categorical Crossentropy</span></div>
+    </div>
+    <div class="training-card">
+      <h3>FASE 2 — FINE-TUNING</h3>
+      <div class="param-row"><span class="param-key">Capas descongeladas</span><span class="param-val">Últimas 40</span></div>
+      <div class="param-row"><span class="param-key">Learning rate</span><span class="param-val">5e-6</span></div>
+      <div class="param-row"><span class="param-key">Épocas</span><span class="param-val">20 (early stopping)</span></div>
+      <div class="param-row"><span class="param-key">Patience</span><span class="param-val">5</span></div>
+      <div class="param-row"><span class="param-key">Batch size</span><span class="param-val">32</span></div>
+      <div class="param-row"><span class="param-key">Class weights</span><span class="param-val">Balanceados</span></div>
+    </div>
+    <div class="training-card">
+      <h3>DATA AUGMENTATION</h3>
+      <div class="param-row"><span class="param-key">Rotación</span><span class="param-val">±20°</span></div>
+      <div class="param-row"><span class="param-key">Zoom</span><span class="param-val">0.2</span></div>
+      <div class="param-row"><span class="param-key">Flip horizontal</span><span class="param-val">Sí</span></div>
+      <div class="param-row"><span class="param-key">Brillo</span><span class="param-val">[0.7 – 1.3]</span></div>
+      <div class="param-row"><span class="param-key">Shear</span><span class="param-val">0.15</span></div>
+      <div class="param-row"><span class="param-key">Desplazamiento</span><span class="param-val">±10%</span></div>
+    </div>
+    <div class="training-card">
+      <h3>VISUALIZACIÓN (GRAD-CAM)</h3>
+      <div class="param-row"><span class="param-key">Capa objetivo</span><span class="param-val">Última conv EfficientNet</span></div>
+      <div class="param-row"><span class="param-key">Método</span><span class="param-val">GradientTape</span></div>
+      <div class="param-row"><span class="param-key">Colormap</span><span class="param-val">Jet (azul → rojo)</span></div>
+      <div class="param-row"><span class="param-key">Alpha overlay</span><span class="param-val">0.45</span></div>
+      <div class="param-row"><span class="param-key">Filtros adicionales</span><span class="param-val">Canny, CLAHE, Negativo</span></div>
+      <div class="param-row"><span class="param-key">Realce textura</span><span class="param-val">Unsharp masking σ=2</span></div>
+    </div>
+  </div>
+
+  <div class="section-title">Limitaciones conocidas</div>
+  <div class="limitations">
+    <div class="limit-item"><div class="limit-num">1</div><div><p>El modelo fue entrenado con un dataset específico y puede no generalizar bien a radiografías con diferentes equipos, técnicas o poblaciones.</p><span>La calidad y posición de la radiografía afecta significativamente el resultado.</span></div></div>
+    <div class="limit-item"><div class="limit-num">2</div><div><p>Las imágenes aumentadas sintéticamente para balancear clases pueden no capturar toda la variabilidad clínica real de cada condición.</p><span>El oversampling con augmentation es una aproximación, no un sustituto de datos reales.</span></div></div>
+    <div class="limit-item"><div class="limit-num">3</div><div><p>El Grad-CAM muestra qué zonas activaron la predicción, pero no garantiza que sean clínicamente correctas si el modelo tiene sesgos.</p><span>Interpretar el mapa de calor con cautela, especialmente en predicciones de baja confianza.</span></div></div>
+    <div class="limit-item"><div class="limit-num">4</div><div><p>La radiografía simple tiene menor sensibilidad que la TC para detectar COVID-19 en fases tempranas.</p><span>Una predicción "Normal" no descarta enfermedad en estadios iniciales.</span></div></div>
+    <div class="limit-item"><div class="limit-num">5</div><div><p>Este modelo es un prototipo académico y no ha sido validado clínicamente.</p><span>No debe utilizarse para toma de decisiones médicas reales.</span></div></div>
+  </div>
+
+  <div class="section-title">Stack tecnológico</div>
+  <div class="stack-row">
+    <span class="stack-pill primary">TensorFlow 2.x</span>
+    <span class="stack-pill primary">EfficientNetB0</span>
+    <span class="stack-pill primary">Keras</span>
+    <span class="stack-pill">FastAPI</span>
+    <span class="stack-pill">OpenCV</span>
+    <span class="stack-pill">NumPy</span>
+    <span class="stack-pill">scikit-learn</span>
+    <span class="stack-pill">Pillow</span>
+    <span class="stack-pill">Matplotlib</span>
+    <span class="stack-pill">SciPy</span>
+    <span class="stack-pill">Python 3.11</span>
+    <span class="stack-pill">HTML · CSS · JS</span>
+  </div>
+
+  <div class="disclaimer">
+    <strong>⚠ Uso académico:</strong> Este modelo fue desarrollado como proyecto de fin de curso. Los resultados tienen fines educativos y de investigación. <strong>No reemplaza el diagnóstico médico profesional.</strong> Cualquier decisión clínica debe ser tomada por un médico calificado con los estudios complementarios correspondientes.
+  </div>
+
+</div>
+</body>
+</html>

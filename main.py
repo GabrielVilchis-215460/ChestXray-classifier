@@ -182,6 +182,11 @@ async def guide():
     with open("static/guide.html", "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
 
+@app.get("/static/about.html", response_class=HTMLResponse)
+async def about():
+    with open("static/about.html", "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read())
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     # Validar tipo
